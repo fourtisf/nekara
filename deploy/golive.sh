@@ -146,19 +146,26 @@ echo "engine up, api answering on :8787"
 # of silence is worth a restart and a message. And the register is the product:
 # keeping a copy of it should not depend on anyone remembering to.
 install -m 755 "$SRC/deploy/watchdog.sh" /usr/local/bin/nekara-watchdog
-install -d "$APP/backup"
+install -m 755 "$SRC/deploy/update.sh"   /usr/local/bin/nekara-update
+install -d "$APP/backup" "$APP/backup/hourly"
 cat > /etc/cron.d/nekara <<CRON
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # is it answering? restart once if not, and say so on Telegram if configured
 */10 * * * * root /usr/local/bin/nekara-watchdog >/dev/null 2>&1
-# the register, daily. It is the one thing here that cannot be rebuilt.
+# the register, hourly. Daily was the interval the day a bad deploy deleted
+# data/ at 10:38 — seven and a half hours of an append-only record with no copy
+# behind it. The file is small and a gap in it cannot be backfilled later.
+41 * * * * root cp $ENGINE/data/register.json $APP/backup/hourly/register-\$(date +\%F-\%H).json 2>/dev/null
+# the daily one is what survives a week, so it is kept separately
 0 3 * * * root cp $ENGINE/data/register.json $APP/backup/register-\$(date +\%F).json 2>/dev/null
-# and do not let ninety days of copies fill the disk quietly
-17 4 1 * * root find $APP/backup -name 'register-*.json' -mtime +90 -delete 2>/dev/null
+# and do not let the copies fill the disk quietly
+17 4 * * * root find $APP/backup/hourly -name 'register-*.json' -mtime +7 -delete 2>/dev/null
+17 4 1 * * root find $APP/backup -maxdepth 1 -name 'register-*.json' -mtime +90 -delete 2>/dev/null
 CRON
 chmod 644 /etc/cron.d/nekara
-echo "watchdog every 10m · register copied daily into $APP/backup"
+echo "watchdog every 10m · register copied hourly and daily into $APP/backup"
+echo "deploys: nekara-update  (never rsync by hand — see deploy/README.md)"
 
 # 5 ──────────────────────────────────────────────────────────────────────────
 say "5/7  nginx"

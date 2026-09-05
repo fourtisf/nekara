@@ -42,24 +42,58 @@ which 18 has behind a flag and 20 has outright.
 
 ### Updating a box that is already running
 
-From `/opt/nekara-src` on the VPS, and **both excludes are the point**:
+One command, on the VPS:
 
-    git -C /opt/nekara-src fetch --depth 1 origin main
-    git -C /opt/nekara-src reset --hard FETCH_HEAD
-    rsync -a --exclude data --exclude node_modules \
-      /opt/nekara-src/signal-engine/ /opt/nekara/signal-engine/
-    systemctl restart nekara-engine
+    nekara-update
 
-`data/` and `node_modules/` are both in `.gitignore`, so neither is in the
-clone. An `rsync --delete` without those excludes therefore deletes the
-register and the installed dependencies — the engine stops booting and the
-only copy of the calls is last night's 03:00 backup. `--depth 1` also makes
-the clone shallow, which is why this fetches and resets rather than pulling:
-`git pull` there fails with "divergent branches" and the rsync on the next
-line runs anyway, against the old tree.
+Do not rsync by hand. That is not a style preference — it is the one thing on
+this box that has already destroyed the record. `data/` and `node_modules/`
+are both in `.gitignore`, so neither is in the clone, and an
+`rsync -a --delete` without `--exclude data --exclude node_modules` deletes
+the register and every dependency in one step. The unit then cannot even
+start, because its `ReadWritePaths` names a directory that no longer exists,
+and the newest copy of the calls is whatever the last cron backup caught.
 
-`bash /opt/nekara/deploy/golive.sh` does all of this correctly and is safe to
-re-run; the commands above are what it does, for when only the engine moved.
+`update.sh` is that command, and every step in it is a guard:
+
+- copies the register to `backup/register-predeploy-*.json` **before** touching
+  anything, and counts the calls in it;
+- fetches and **resets** rather than pulling — `--depth 1` leaves the clone
+  shallow, `git pull` there dies on "divergent branches", and in a pasted block
+  every line after it runs anyway against the old tree;
+- rsyncs with `--delete` **beside** both excludes, which is safe because rsync
+  protects excluded receiver files from deletion unless `--delete-excluded` is
+  given. Remove either exclude and you have the original bug back;
+- reinstalls dependencies only when they are missing or the lockfile moved;
+- `reset-failed` before restart, because a few hundred failed starts hit
+  systemd's rate limit and then a correct fix looks like it did not work;
+- waits for `/api/verify`, and **refuses to call the deploy good** if the chain
+  stops verifying or the call count came back lower than it went in. It names
+  the backup to restore.
+
+`bash /opt/nekara/deploy/golive.sh` is still the full first-run installer and
+is safe to re-run; `nekara-update` is the day-to-day one.
+
+### Backups
+
+`/opt/nekara/backup/hourly/` hourly for 7 days, `/opt/nekara/backup/` daily for
+90, plus a pre-deploy copy on every `nekara-update`. Daily alone was the
+interval on the day a bad deploy removed `data/` at 10:38 — seven and a half
+hours of an append-only record with nothing behind it, and a gap in an
+append-only register cannot be backfilled afterwards.
+
+### Where the watchdog complains
+
+`TG_OPS_CHAT` in a drop-in, never `TG_CHAT`:
+
+    printf '[Service]\nEnvironment=TG_OPS_CHAT=<your own chat id>\n' \
+      > /etc/systemd/system/nekara-engine.service.d/ops.conf
+    systemctl daemon-reload
+
+Unset, the watchdog restarts and logs but announces nothing. That is
+deliberate: the channel carries a call and how far it ran, and an
+"engine is down" line there gives a subscriber nothing to do except distrust
+the desk.
 
 ## 2 · Preflight, before anything writes
 

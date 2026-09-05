@@ -57,6 +57,12 @@ Environment=CALLER_ID=1
 
 # Tier gating resolves on-chain when both are set. Without them everyone is
 # public tier, which is correct while no keys exist.
+# Where the watchdog says the engine is down. Never TG_CHAT: the channel carries
+# a call and how far it ran, and an ops alarm there only teaches subscribers to
+# distrust the desk. A DM to yourself is the right room; unset means the journal
+# only, and the watchdog says so rather than falling back to the channel.
+# Environment=TG_OPS_CHAT=
+
 # Environment=KEYS_CONTRACT=
 # Environment=BASE_RPC=
 

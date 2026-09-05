@@ -20,11 +20,18 @@ log() { logger -t nekara-watchdog "$*" 2>/dev/null || true; echo "$*"; }
 
 # The token lives in the unit's environment, not in this script. Absent is fine:
 # the watchdog still restarts and still logs, it just cannot announce.
+#
+# It announces to TG_OPS_CHAT and never to TG_CHAT. The channel carries a call
+# and how far it ran, and nothing else — "the engine is down" is a third kind of
+# message, addressed to the operator rather than to a subscriber, and a
+# subscriber who reads it can do nothing with it but distrust the desk. Unset
+# means the log only, which is the honest failure: no alert is better than an
+# alert in the wrong room.
 tg() {
   local env tok chat
   env=$(systemctl show "$UNIT" -p Environment --value 2>/dev/null || true)
   tok=$(printf '%s\n' "$env" | tr ' ' '\n' | sed -n 's/^TG_TOKEN=//p' | head -1)
-  chat=$(printf '%s\n' "$env" | tr ' ' '\n' | sed -n 's/^TG_CHAT=//p' | head -1)
+  chat=$(printf '%s\n' "$env" | tr ' ' '\n' | sed -n 's/^TG_OPS_CHAT=//p' | head -1)
   [ -n "${tok:-}" ] && [ -n "${chat:-}" ] || return 0
   curl -fsS -m 10 -X POST "https://api.telegram.org/bot$tok/sendMessage" \
     -d "chat_id=$chat" -d "text=$1" >/dev/null 2>&1 || true
@@ -49,6 +56,17 @@ alive && exit 0
 
 log "api not answering — restarting $UNIT"
 : > "$STATE"
+
+# 226/NAMESPACE means systemd refused before node ever ran — almost always a
+# path in ReadWritePaths that no longer exists. Restarting that forever prints
+# the same line every ten minutes and fixes nothing, so it is named.
+if systemctl show "$UNIT" -p StatusErrno --value 2>/dev/null | grep -q '^226$' \
+   || journalctl -u "$UNIT" -n 5 --no-pager 2>/dev/null | grep -q 'mount namespacing'; then
+  MISSING=$(journalctl -u "$UNIT" -n 20 --no-pager 2>/dev/null \
+    | sed -n 's/.*mount namespacing: \([^:]*\): No such file.*/\1/p' | tail -1)
+  log "unit cannot start — missing path: ${MISSING:-unknown}"
+  tg "🔴 nekara engine cannot start: ${MISSING:-a path it needs} is missing. It is not a crash — systemd refuses before node runs."
+fi
 systemctl restart "$UNIT" 2>/dev/null || { log "restart failed"; tg "🔴 nekara engine is down and the restart failed"; exit 1; }
 
 sleep 10
