@@ -460,16 +460,26 @@ continuing. Everything else is recoverable; that one is not.
   record, and the picture must never cost a subscriber the call. Progress and
   outcome messages stay plain: a channel where every message is a picture is a
   channel where the picture stops meaning anything.
-- **The channel carries the call, then how far it ran. Nothing else.** The exit
-  alert was removed on the owner's instruction, and so was the `Stop` row on the
-  outcome card. **A call that is dead when it settles is not announced either**,
-  same instruction and same split: the row settles with its verdict and its
-  `isDead` mark, the Signals page and the CSV carry it, hit rate still counts it
-  in the denominator, and an operator still gets a `[DEAD]` line — only the
-  message is gone. `WIN · DEAD` on one line is the end of a story nobody
-  subscribed to hear. `test-exit-alert.js` asserts both halves, and that a
-  settled *miss* which is not dead still goes out, so "quiet about the dead" can
-  never drift into "quiet about the losses". **The rule was not removed**: the poller still walks the trailing
+- **Two messages carry a call: it fired, and how far it ran. Nothing else.**
+  The exit alert went first on the owner's instruction, then the `Stop` row on
+  the outcome card, then the dead mark, and now **the outcome itself — win and
+  miss alike**. `formatOutcome` was deleted rather than left unused, because a
+  formatter with no caller is how a decision gets reversed without anyone
+  noticing; announcing an outcome again is a change someone has to write.
+  The direction that decides this is the **win**, not the loss: a channel that
+  goes quiet about losses while still announcing wins is the shape of every
+  signal scam there has ever been, and the only way that can never happen here
+  is for no outcome to be announced at all. So `test-exit-alert.js` asserts the
+  *winner* is withheld too. A reader who wants to know how a call ended reads
+  the record, where every call ends.
+  Suppressed, never dropped, and that distinction is the whole product: the row
+  settles with its verdict and its `isDead` mark, the Signals page and the CSV
+  carry it, hit rate still counts it in the denominator — the test asserts that
+  denominator directly — and an operator still gets a `[DEAD]`/`[SETTLED]` line.
+  The promise that used to ride on the outcome message now rides on the signal,
+  and it names *the record* rather than "here", because the channel is the one
+  place a call's ending is no longer published.
+  **The rule was not removed**: the poller still walks the trailing
   stop forward, still freezes the fill on the mark, and the Hindsight table and
   the call page still read it — an `[EXIT]` line still goes to the log, because
   an operator watching a fill is not the same as broadcasting one. Deleting a

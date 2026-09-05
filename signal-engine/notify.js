@@ -79,17 +79,11 @@ export function formatSignal(sig, seq) {
     ...chainLines(sig),
     ``,
     `${link("Chart", chartUrl(sig))} · ${link("Record on nekara.xyz", callUrl(seq))}`,
+    ``,
+    `_Win or loss, this call settles on the record and is never removed\\._`,
   ].filter(l => l !== null).join("\n");
 }
 
-/**
- * Sent while a call is still open, when the trailing stop fills.
- *
- * This is the half of a call that nobody publishes, because it is the half you
- * can be wrong about in public. It is written as what the rule did, never as
- * what to do: the stop is walked over sampled prices with no slippage, so it is
- * an upper bound on a trailing stop and not a fill anyone is promised.
- */
 /**
  * Where a call is now, against where it was called.
  *
@@ -126,30 +120,6 @@ export function formatProgress(row) {
   ].join("\n");
 }
 
-/** Sent when a call settles — including the losses. Nobody else posts these. */
-export function formatOutcome(row) {
-  const win = row.verdict === "win";
-  const mark = row.isDead ? "⚫" : win ? "✅" : "❌";
-  const v = win ? "WIN" : "MISS";
-  const dead = row.isDead ? " · DEAD" : "";
-  return [
-    `${mark} *${esc(v)}${esc(dead)}* · \\#${pad4(row.seq)} ${esc(ticker(row.symbol))}`,
-    ``,
-    "```",
-    `Peak     ${row.peakX.toFixed(2)}x`,
-    `Now      ${row.nowX.toFixed(2)}x`,
-    row.secondsTo2x
-      ? `To 2x    ${Math.round(row.secondsTo2x / 60)}m`
-      : `To 2x    never`,
-    "```",
-    `Fired on: ${esc((row.reasons ?? [])[0] ?? "n/a")}`,
-    ``,
-    ...ca(row.tokenAddress),
-    `${link("Record on nekara.xyz", callUrl(row.seq))}`,
-    ``,
-    `_Every call stays up, win or loss\\. Nothing here is ever removed\\._`,
-  ].join("\n");
-}
 
 /* Telegram truncates a photo caption at 1024 characters and does it silently,
    which on this product means losing the tail of the reasons — the half that

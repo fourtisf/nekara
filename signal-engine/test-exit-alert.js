@@ -1,12 +1,18 @@
 /**
- * The stop, walked and recorded and never announced. And what is announced
- * instead: how far the call has run.
+ * What the channel says, and everything it deliberately does not.
  *
- * The exit alert was removed from the channel on the owner's instruction —
- * signals, then progress. Removing a message is the easiest way to quietly
- * remove a rule, so the first thing here is that the stop still fills, still
- * walks forward over every observation, and still lands on the mark, with
- * nothing going out about it.
+ * Two messages carry a call on the owner's instruction: it fired, and then how
+ * far it ran. The exit alert went first, then the dead mark, and now the
+ * outcome — win and miss alike. Removing a message is the easiest way to
+ * quietly remove a rule, so the first thing here is that the stop still fills,
+ * still walks forward over every observation, and still lands on the mark,
+ * with nothing going out about it.
+ *
+ * The outcome half is the one worth being strict about, and the strictness runs
+ * the other way from the instinct: withholding losses while announcing wins is
+ * the shape of every signal scam there is, so the assertions below are that
+ * *nothing* is announced either way, that the register carries both, and that
+ * hit rate still divides by both.
  *
  * Then the thing that replaced it. Three properties, and all three are the
  * ones that go wrong:
@@ -29,9 +35,9 @@
 import { rmSync } from "node:fs";
 import { FileStore } from "./store.js";
 import { start } from "./index.js";
-import { applyObservation, RULES } from "./scorer.js";
+import { applyObservation, RULES, stats } from "./scorer.js";
 import { trailExit, TRAIL_DROP } from "./analytics.js";
-import { formatSignal, formatOutcome } from "./notify.js";
+import { formatSignal } from "./notify.js";
 
 const DATA = "./data/exit-alert-test.json";
 const PORT = 8799;
@@ -176,10 +182,11 @@ head("pesan yang masuk ke channel");
   ok(/nothing could be established/.test(empty),
     "laporan yang datang kosong juga bilang begitu, bukan diam");
 
-  const loss = formatOutcome({ seq: 12, symbol: "FINE", verdict: "miss", isDead: true,
-    peakX: 1.12, nowX: 0.06, secondsTo2x: null, reasons: ["Volume"] });
-  ok(/MISS/.test(loss) && /DEAD/.test(loss), "yang kalah diumumkan dengan kata yang sama jelasnya");
-  ok(/ever removed/.test(loss), "dan pesannya sendiri mengatakan itu tidak akan dihapus");
+  /* The promise used to ride on the outcome message, which no longer exists.
+     It says "on the record" rather than "here", because the channel is now the
+     one place a call's ending is not published. */
+  ok(/never removed/.test(m), "janji bahwa call ini tidak akan dihapus ikut di pesan sinyalnya");
+  ok(/on the record/.test(m), "dan menunjuk ke catatannya, bukan ke channel");
 }
 
 /* ═══════ through the engine, which is where the alert comes from ═══════ */
@@ -245,7 +252,13 @@ head("yang mati dicatat, tidak diumumkan");
   eng.stop();
 }
 
-head("yang settle tanpa mati tetap diumumkan");
+/* The half that stops this being a highlight reel.
+   No outcome is announced now, and the direction that matters is the win: a
+   channel that went quiet about losses and kept announcing wins would be the
+   thing this register was built to be the opposite of. So the assertion is not
+   "the loss is withheld" — it is that nothing is announced either way, while
+   the record carries both and the hit rate still divides by both. */
+head("tidak ada outcome yang diumumkan, dan catatannya tetap memuat semuanya");
 {
   rmSync(DATA, { force: true });
   const store = new FileStore(DATA);
@@ -258,8 +271,38 @@ head("yang settle tanpa mati tetap diumumkan");
 
   const m = store.mark(alive.seq);
   ok(m.state === "settled" && !m.isDead, "settle dan tidak mati");
-  ok(sent.some(t => /MISS/.test(t)),
-    "outcome-nya tetap keluar — yang disaring cuma yang mati, bukan yang kalah");
+  ok(m.verdict === "miss", "verdict-nya tercatat sebagai miss");
+  ok(!sent.length, "dan tidak ada apa pun yang keluar ke channel");
+
+  const st = stats([{ ...store.allCalls()[0], ...m }], 365);
+  ok(st.calls === 1 && st.wins === 0 && st.hitRate === 0,
+    "hit rate tetap membaginya — yang diam channel-nya, bukan penyebutnya");
+  eng.stop();
+}
+
+/* And the same for a winner, because the rule only means something if it holds
+   in the direction nobody would complain about. */
+head("yang menang juga tidak diumumkan");
+{
+  rmSync(DATA, { force: true });
+  const store = new FileStore(DATA);
+  /* Peak only rises while a call is live, so a call already past its window can
+     never settle as a win — it has to run first and settle after. Fired a
+     breath short of the window, so one observation takes the 3x and the next,
+     half a second later, is the one that settles it. */
+  const won = newCall(store, new Date(Date.now() - RULES.liveHours * 3600e3 + 400).toISOString());
+  const eng = start({ store, api, port: PORT + 5, log: () => {}, telegram, publicDelayS: 0 });
+
+  sent.length = 0;
+  pairs = [pair(ENTRY * 3)];
+  await eng.refresh(store.liveCalls());
+  await new Promise(r => setTimeout(r, 500));
+  await eng.refresh(store.liveCalls());
+
+  const m = store.mark(won.seq);
+  ok(m.state === "settled" && m.verdict === "win", "settle sebagai win");
+  ok(!sent.some(t => /WIN/.test(t)), "dan tetap tidak ada pesan WIN ke channel");
+  ok(sent.some(t => /📈/.test(t)), "yang keluar cuma kemajuannya — dua pesan itu saja");
   eng.stop();
 }
 
