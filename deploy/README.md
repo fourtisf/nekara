@@ -95,6 +95,16 @@ deliberate: the channel carries a call and how far it ran, and an
 "engine is down" line there gives a subscriber nothing to do except distrust
 the desk.
 
+Then fire it once, because alerting that has never been fired is alerting
+nobody has checked:
+
+    nekara-watchdog --test
+
+It sends one message and says whether Telegram accepted it. Every send path
+now reports its own outcome — an alert that never left the box used to look
+exactly like one that arrived, which is the same fault this project refuses
+everywhere else.
+
 ## 2 · Preflight, before anything writes
 
     cd /opt/nekara/signal-engine && node preflight.js --rounds 3

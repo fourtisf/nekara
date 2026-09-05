@@ -28,14 +28,34 @@ log() { logger -t nekara-watchdog "$*" 2>/dev/null || true; echo "$*"; }
 # means the log only, which is the honest failure: no alert is better than an
 # alert in the wrong room.
 tg() {
-  local env tok chat
+  local env tok chat out
   env=$(systemctl show "$UNIT" -p Environment --value 2>/dev/null || true)
   tok=$(printf '%s\n' "$env" | tr ' ' '\n' | sed -n 's/^TG_TOKEN=//p' | head -1)
   chat=$(printf '%s\n' "$env" | tr ' ' '\n' | sed -n 's/^TG_OPS_CHAT=//p' | head -1)
-  [ -n "${tok:-}" ] && [ -n "${chat:-}" ] || return 0
-  curl -fsS -m 10 -X POST "https://api.telegram.org/bot$tok/sendMessage" \
-    -d "chat_id=$chat" -d "text=$1" >/dev/null 2>&1 || true
+  if [ -z "${tok:-}" ] || [ -z "${chat:-}" ]; then
+    log "no alert sent — TG_TOKEN or TG_OPS_CHAT is unset"
+    return 1
+  fi
+  # An alert that never left the box must not read like one that arrived. The
+  # old version swallowed every failure, which is the same fault this project
+  # refuses everywhere else: silence standing in for success.
+  out=$(curl -sS -m 10 -X POST "https://api.telegram.org/bot$tok/sendMessage" \
+    -d "chat_id=$chat" -d "text=$1" 2>&1) || { log "alert failed to send — $out"; return 1; }
+  case "$out" in
+    *'"ok":true'*) log "alert sent to $chat"; return 0 ;;
+    *) log "telegram refused the alert — $out"; return 1 ;;
+  esac
 }
+
+# `nekara-watchdog --test` answers the one question the rest of this script
+# cannot: does an alarm actually reach a human. Wiring it and never firing it is
+# how an operator finds out at the same moment as the outage.
+if [ "${1:-}" = "--test" ]; then
+  if tg "🔵 nekara watchdog test — alerting is wired. Nothing is wrong."; then
+    log "test alert delivered"; exit 0
+  fi
+  log "test alert did NOT arrive — fix this before trusting the watchdog"; exit 1
+fi
 
 alive() { curl -fsS -m 8 "$API" >/dev/null 2>&1; }
 
