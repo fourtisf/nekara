@@ -175,6 +175,10 @@ node test-exit-alert.js   # the stop walked live and recorded and never
 node test-tgbot.js   # the alert bot: link codes, filters, and that a tier is
                      # read from the chain at send time rather than stored
 node test-mint.js    # what the mint panel is told, and what it is never told
+node test-api.js     # the public API index against the routes api.js actually
+                     # handles, in both directions — a documented route that does
+                     # not exist and a route nobody documented both fail here,
+                     # and the delay it reports is the delay the server applies
 node test-alpha-invite.js   # the channel invite, and the sweep that makes it
                      # honest: who is refused, why an unlinked wallet is refused
                      # rather than served, that a wallet which sold its keys is
@@ -599,6 +603,17 @@ continuing. Everything else is recoverable; that one is not.
   rather than nothing, because silence there is indistinguishable from a bot that
   is broken. Both it and `/alpha` decide through `alphaFor`, which is the split
   the rule above demands — one decision, two wordings.
+- **The API describes itself, and the description is derived rather than written.**
+  `GET /api` is the index: every public route, its parameters and what it returns,
+  from `apidoc.js`. `test-api.js` parses the dispatch in `api.js` and holds the two
+  against each other **both ways** — a documented route that does not exist fails,
+  and so does a route nobody documented unless `PRIVATE` says why it is not
+  advertised. Documentation drifts silently otherwise: a renamed route and a
+  stale doc read alike to whoever wrote them, and only a stranger's client finds
+  out. The index reports `delays[0]` as the number in force rather than a claim
+  about it, and says out loud when the gate is at zero — a caller who believes
+  they are on a delay that is not applied has been told something false about
+  the only thing that makes a timestamp mean anything here.
 - Multi-caller schema from day one. The house desk is `callers.id = 1`. This is
   what lets the product run as one desk today and as a referee later with no
   migration.

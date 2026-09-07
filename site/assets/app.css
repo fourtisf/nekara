@@ -112,6 +112,10 @@ h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.032em;line-
 /* The contract, under the buttons rather than beside them: it is what a reader
    copies after deciding, not one of the two things they came to decide between.
    Same parts as the header bar, so there is one chip and not two designs. */
+/* Three lines somebody pastes into a terminal, so they read as a terminal. */
+.apiex{background:var(--bg-2);border:1px solid var(--border);border-radius:9px;
+  padding:13px 15px;font-size:12px;line-height:1.9;color:var(--tx-2);overflow-x:auto;
+  margin:14px 0 4px;white-space:pre}
 .hero-ca{display:inline-flex;align-items:center;gap:9px;margin-top:22px;
   border:1px solid var(--border);border-radius:9px;padding:7px 11px;
   background:rgba(255,255,255,.025)}

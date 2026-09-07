@@ -21,6 +21,7 @@ import { NoHoldings, levelFor, LADDER, LEVEL_NAME, PUBLIC as L_PUBLIC, PREMIUM a
 import { SIGNALS } from "./rules.js";
 import { KeysReader } from "./keys.js";
 import { EthUsd } from "./usd.js";
+import { index as apiIndex } from "./apidoc.js";
 
 const readBody = req => new Promise((resolve, reject) => {
   let b = ""; let over = false;
@@ -197,6 +198,13 @@ export function serve(store, {
        the browser — but nothing about this is a gate: the contract refuses a
        wallet that is not entitled, and this route only saves the visitor from
        paying gas to find that out. */
+    /* The API says what it is. Every route below already worked; what was
+       missing was any way to find out, and a register nobody can consume
+       programmatically is a website. It reports the public delay in force
+       rather than a claim about it, because that number is the only thing an
+       outside caller has to understand before trusting a timestamp. */
+    if (p === "/api" || p === "/api/") return json(res, 200, apiIndex({ delays, site: domain }));
+
     if (p === "/api/keys") return json(res, 200, keys.identity());
 
     if (p === "/api/keys/state") {

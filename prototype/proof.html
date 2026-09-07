@@ -118,6 +118,10 @@ h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.032em;line-
 /* The contract, under the buttons rather than beside them: it is what a reader
    copies after deciding, not one of the two things they came to decide between.
    Same parts as the header bar, so there is one chip and not two designs. */
+/* Three lines somebody pastes into a terminal, so they read as a terminal. */
+.apiex{background:var(--bg-2);border:1px solid var(--border);border-radius:9px;
+  padding:13px 15px;font-size:12px;line-height:1.9;color:var(--tx-2);overflow-x:auto;
+  margin:14px 0 4px;white-space:pre}
 .hero-ca{display:inline-flex;align-items:center;gap:9px;margin-top:22px;
   border:1px solid var(--border);border-radius:9px;padding:7px 11px;
   background:rgba(255,255,255,.025)}
@@ -1166,6 +1170,14 @@ footer{border-top:1px solid var(--border);padding:34px 0;display:flex;justify-co
       <table class="tbl"><thead><tr><th>Date</th><th style="text-align:right">Calls</th><th>Head</th></tr></thead>
       <tbody id="vAnchors"></tbody></table>
       <button class="btn btn-s btn-full" style="margin-top:16px" id="vCsv">Download full register as CSV</button>
+    </div>
+    <div class="box" style="grid-column:1/-1">
+      <h3>The API</h3>
+      <p class="sub">A record only you can read is a claim. Every figure on this site comes from routes anyone can call, open to any origin and needing no key. <code class="mono">/api</code> lists all of them, with their parameters and what each returns.</p>
+      <pre class="apiex mono">curl https://nekara.xyz/api
+curl "https://nekara.xyz/api/register?verdict=miss&amp;limit=20"
+curl https://nekara.xyz/api/verify</pre>
+      <p class="sub">Two things worth knowing before you trust a timestamp. An anonymous caller is on the public leg, which is the slowest tier — calls fired more recently than that are not in the response at all, rather than present and marked, and <code class="mono">/api</code> reports the delay actually in force. And every filter on <code class="mono">/api/register</code> narrows what comes back without touching <code class="mono">/api/stats</code>: the published rates stay over the whole register, misses included.</p>
     </div>
   </div>
 </div></div>

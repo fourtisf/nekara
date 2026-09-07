@@ -437,6 +437,14 @@
       <tbody id="vAnchors"></tbody></table>
       <button class="btn btn-s btn-full" style="margin-top:16px" id="vCsv">Download full register as CSV</button>
     </div>
+    <div class="box" style="grid-column:1/-1">
+      <h3>The API</h3>
+      <p class="sub">A record only you can read is a claim. Every figure on this site comes from routes anyone can call, open to any origin and needing no key. <code class="mono">/api</code> lists all of them, with their parameters and what each returns.</p>
+      <pre class="apiex mono">curl https://nekara.xyz/api
+curl "https://nekara.xyz/api/register?verdict=miss&amp;limit=20"
+curl https://nekara.xyz/api/verify</pre>
+      <p class="sub">Two things worth knowing before you trust a timestamp. An anonymous caller is on the public leg, which is the slowest tier — calls fired more recently than that are not in the response at all, rather than present and marked, and <code class="mono">/api</code> reports the delay actually in force. And every filter on <code class="mono">/api/register</code> narrows what comes back without touching <code class="mono">/api/stats</code>: the published rates stay over the whole register, misses included.</p>
+    </div>
   </div>
 </div></div>
 
