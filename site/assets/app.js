@@ -2839,9 +2839,10 @@ const SOCIAL={x:"https://x.com/Nekaraxyz",tg:"https://t.me/nekaraxyz"};
    pastes into a wallet, so it is printed in full on click and never guessed:
    there is no fallback and no shortening that could hide a changed character. */
 const TOKEN_CA="0xf75a6ddefaAc656579a0f39a1A6faa5f5543709a";
-(function paintCa(){
-  const el=document.getElementById("caVal");
-  if(!el)return;
+/* Every chip on the page, from the one constant. The address appears in the
+   header and again in the hero, and two copies of it in the markup would be two
+   chances for one of them to be an address nobody checked. */
+document.querySelectorAll("[data-ca-chip]").forEach(el=>{
   if(!/^0x[0-9a-fA-F]{40}$/.test(TOKEN_CA)){
     el.className="val soon";
     el.innerHTML='<i></i>Coming soon';
@@ -2867,7 +2868,7 @@ const TOKEN_CA="0xf75a6ddefaAc656579a0f39a1A6faa5f5543709a";
       el.classList.add("full");
     }
   });
-})();
+});
 document.querySelectorAll("[data-social]").forEach(a=>{
   const url=SOCIAL[a.dataset.social];
   if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer"}
