@@ -277,7 +277,7 @@ can be trimmed without checking the count again.
 > and deletes outright.
 >
 > CA: `0x…`
-> nekara.xyz · t.me/nekarasignals
+> nekara.xyz · t.me/nekaraxyz
 
 The placeholder is `0x…` and not a plausible-looking string of zeroes on
 purpose: pasted by accident it is obviously unfinished, where `0x0000…0000`

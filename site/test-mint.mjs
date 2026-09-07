@@ -476,6 +476,23 @@ head("alamat halaman");
    not "it converts" — it is that a rate the route could not read leaves the
    panel with no dollar figure at all, rather than a stale or guessed price a
    buyer would act on. */
+/* The brand links, checked because their failure is silent. They shipped once
+   pointing at "#" on a live site, which is worse than no icon: a reader who
+   clicks one learns the page is unfinished. An empty entry hides the icon
+   instead — the two states must not be confused. */
+head("ikon merek menunjuk ke tempat yang benar");
+{
+  const a = await boot({});
+  const tg = [...a.doc.querySelectorAll('[data-social="tg"]')];
+  ok(tg.length >= 1, `ikon Telegram ada di halaman (${tg.length})`);
+  ok(tg.every(el => el.getAttribute("href") === "https://t.me/nekaraxyz"),
+    "dan setiap satunya menunjuk ke t.me/nekaraxyz");
+  ok(tg.every(el => !el.classList.contains("hide")), "tidak ada yang disembunyikan");
+  const x = [...a.doc.querySelectorAll('[data-social="x"]')];
+  ok(x.every(el => /^https:\/\/x\.com\//.test(el.getAttribute("href") ?? "")),
+    "begitu juga X — tidak ada satu pun yang tertinggal di \"#\"");
+}
+
 head("harga dolar hanya muncul kalau kursnya benar-benar terbaca");
 {
   // nextPrices is what the total is actually summed from — one flat phase here,

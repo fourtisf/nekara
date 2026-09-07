@@ -373,7 +373,7 @@ const live = (w, h) => page(w, h, `
     <p style="font-size:${h > 1000 ? 20 : 19}px;line-height:1.64;color:var(--tx-2);max-width:640px;margin-top:24px">Every call arrives with the exact conditions that triggered it, then stays on a public register that is tracked to win, miss or dead. The ones that fail are never removed.</p>
     <div style="display:flex;align-items:center;gap:14px;margin-top:${h > 1000 ? 36 : 40}px">
       <div style="padding:13px 22px;border-radius:var(--r);background:var(--grad);
-        font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.01em;color:#fff">t.me/nekarasignals</div>
+        font-family:var(--display);font-weight:600;font-size:18px;letter-spacing:-.01em;color:#fff">t.me/nekaraxyz</div>
       <div class="mono" style="font-size:15px">nekara.xyz</div>
     </div>
   </div>
@@ -608,7 +608,7 @@ const launch = (w, h) => page(w, h, `
     <div style="display:flex;align-items:center;gap:16px">
       <div style="padding:13px 24px;border-radius:var(--r);background:var(--grad);
         font-family:var(--display);font-weight:600;font-size:18px;color:#fff">nekara.xyz</div>
-      <div class="mono" style="font-size:15px">t.me/nekarasignals</div>
+      <div class="mono" style="font-size:15px">t.me/nekaraxyz</div>
     </div>
     <div class="eyebrow" style="font-size:10.5px">Robinhood Chain &middot; 4663</div>
   </div>
@@ -854,7 +854,7 @@ ${sq
       <div style="padding:14px 28px;border-radius:var(--r);background:var(--grad);
         font-family:var(--display);font-weight:600;font-size:19px;color:#fff;
         box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 10px 26px -10px rgba(91,124,250,.7)">nekara.xyz</div>
-      <div class="mono" style="font-size:15px">t.me/nekarasignals</div>
+      <div class="mono" style="font-size:15px">t.me/nekaraxyz</div>
     </div>
     ${sq ? '' : `<div class="mono" style="font-size:12.5px;letter-spacing:.2em;text-transform:uppercase">
       Signals · Hindsight · Triage · Custody</div>`}
