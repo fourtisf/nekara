@@ -1017,6 +1017,28 @@ fs.writeFileSync('brand/banners/a1-alpha.html', alpha(1600, 900));
 fs.writeFileSync('brand/banners/a2-alpha-square.html', alpha(1080, 1080));
 
 
+/* The proof shot. Everything else on the account is an argument; this is the
+   channel actually firing, and one real message outweighs three claims.
+
+   It takes a real screenshot and never a rebuilt one. A Telegram window
+   recreated in HTML would be a picture of somebody else's product that looks
+   like evidence and is not — the same fault as a panel that renders silence as
+   a green tick, in the one place a reader has no way to check. So if the file
+   is not there the banner is not written, and the run says so. */
+const TG_SHOT = path.join(__dirname, 'shots', 'alpha-tg.png');
+if (fs.existsSync(TG_SHOT)) {
+  fs.writeFileSync('brand/banners/a3-alpha-proof.html', post(
+    'Alpha · private channel',
+    'The filter is<br>already running.<br><span class="grad-tx">Three keys<br>opens the room.</span>',
+    'Only the desk\'s highest-scoring calls reach it, on the same clock as the public channel — later than every paid tier, never earlier. The invite is issued to the wallet that holds the keys, and taken back when they go.',
+    `<img class="ui" src="${SHOT('alpha-tg.png')}" style="width:100%">`));
+  console.log('  a3-alpha-proof ditulis');
+} else {
+  console.error('  a3-alpha-proof DILEWATI — brand/shots/alpha-tg.png tidak ada.\n' +
+    '  Ambil screenshot channel alpha yang sebenarnya dan simpan di situ; jangan pernah menggambar ulang jendela Telegram.');
+}
+
+
 if (!CA) console.error('  peringatan: out/keys.4663.json tidak terbaca — banner mint tanpa alamat kontrak');
 
 console.log('26 banner + 1 avatar ditulis');

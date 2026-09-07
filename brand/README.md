@@ -147,6 +147,7 @@ account rather than four templates.
 | `x4-mint-live.png` / `x4-mint-live-square.png` | 1600×900 / 1080×1080 | phase 1 mint |
 | `x5-token.png` / `x5-token-square.png` | 1600×900 / 1080×1080 | the token |
 | `a1-alpha.png` / `a2-alpha-square.png` | 1600×900 / 1080×1080 | the alpha channel |
+| `a3-alpha-proof.png` | 1600×900 | the channel actually firing |
 
 `x5-token` carries no contract address on purpose. A banner cannot be corrected
 once it is on a timeline, and the ticker is the part that does not change; the
@@ -166,6 +167,15 @@ is three keys rather than one key printed three times, all from the blue and
 violet palettes so the artwork does not argue with `--grad`, and every one of
 them through `keyBody`, which blanks the tier — a banner must never print a
 draw that has not run.
+
+`a3-alpha-proof` needs `brand/shots/alpha-tg.png` — **a real screenshot of the
+real channel**, and the run refuses to write the banner without one rather than
+render an empty frame. Take it from the channel view (not the sidebar row), on
+desktop Telegram, wide enough that a signal card and its reasons are readable.
+Never rebuild the Telegram window in HTML for it: a recreated window is a
+picture of somebody else's product that reads as evidence and is not, which is
+the same fault as a panel that renders silence as a green tick — in the one
+place a reader has no way to check.
 
 Its four facts are structural — chain id, append-only, the gate count, the
 season size — and every one of them is checkable. Nothing that moves goes on a
