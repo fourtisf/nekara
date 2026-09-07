@@ -768,7 +768,9 @@ const USAGE = `
     prices <fase1Eth> <fase2Eth> <fase3Eth>
     commit <secret> [--ahead 600]  komitkan seed musim, dipatok ke satu blok
                                    Ethereum mainnet yang belum ada
-    reveal <secret>                buka seed (fase harus Closed)
+    reveal [rahasia]               buka seed (fase harus Closed). Dipipa seperti
+                                   commit; tanpa --confirm ia hanya memeriksa
+                                   bahwa rahasianya cocok dengan komitmen
     withdraw <alamat>              kirim seluruh saldo kontrak
 
   env: DEPLOY_RPC (wajib), DEPLOY_PK (untuk mengirim), KEYS_CONTRACT (opsional),
@@ -908,8 +910,20 @@ const USAGE = `
   }
 
   if (cmd === 'reveal') {
-    const secret = argv._[1];
-    if (!secret) die('usage: keys.js reveal <secret>');
+    /* The same three ways in as commit, and for a reason that only shows up
+       before the season ends: without --confirm this command is how an operator
+       checks the secret still matches the commitment, and that check is worth
+       nothing if making it writes the secret into bash history and ps. It is
+       public after the reveal lands, never a moment sooner. */
+    const typed = argv._[1];
+    const secret = typed ?? env('SEED_SECRET') ?? (await readSecret());
+    if (!secret) die('rahasia tidak diberikan.\n\n'
+      + 'Salah satu dari:\n'
+      + '  read -s -p "rahasia: " S && printf %s "$S" | node contracts/keys.js reveal\n'
+      + '  SEED_SECRET=… di .keys.env\n'
+      + '  node contracts/keys.js reveal "<rahasia>"   (masuk riwayat bash — hindari)');
+    if (typed) console.error('peringatan: rahasia diberikan sebagai argumen, jadi ia ada di\n'
+      + '  riwayat bash dan sempat terlihat di ps. Bersihkan dengan: history -c\n');
     const h = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(secret));
 
     const commit = await c.seedCommit();
