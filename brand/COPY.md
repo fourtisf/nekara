@@ -167,6 +167,95 @@ and it is the only reason to believe the rest of the account.
 > code. If the wallet holds three keys the bot hands you the link the moment it
 > is linked. `/alpha` asks again any time.
 
+## The mint
+
+For `x4-mint-live.png` (X) and `x4-mint-live-square.png` (Telegram, Instagram).
+
+**Three things must be true on chain before any of this is posted**, and none of
+them is checked by the banner — `MINT_STATE` is an env var, not a chain read:
+
+1. **`PUBLIC_DELAY_S` is no longer 0.** A key buys latency. While the public leg
+   is 0s the free channel gets the call at the same instant as Tier III, so a
+   key buys nothing at all — and the first sale would be latency sold and not
+   delivered. It is set to 0 only while nothing has been sold; the phase opening
+   is the moment that stops being true.
+2. **The renderer on chain is the current one.** `parity.js` found the deployed
+   art a deploy behind the page — Ashfall drew six bright dots on chain against
+   a drift of twenty-six, the spoke crown a dashed circle. A buyer receiving
+   different art from what was displayed is mis-selling, not a rough edge.
+   `node contracts/keys.js renderer --confirm` first.
+3. **The seed is committed.** `mintPublic` does not require a commitment, and
+   `recommitSeed` is already gone — it only works while `totalMinted == 0` and
+   keys exist. So if `seedCommit` is still zero this is a one-shot with no undo,
+   and it belongs *before* the paid phase: a commitment made after minting has
+   begun is made by a deployer who already knows part of the entropy.
+
+`node contracts/keys.js state` answers all three, plus whether the phase is
+actually One. A banner that says LIVE NOW next to a contract that reverts is
+the one thing this product exists not to do.
+
+**What this copy may not say.** Nothing about returns, revenue, a share of
+anything, or the token. A key buys seconds on a feed and a filter above three
+keys, and that is the whole of it. "Access, not an investment" is on the banner
+because it is the claim the account has to be able to defend on its worst day.
+
+### The post
+
+> Proof Keys, Season 1 — phase 1 is open. 666 keys at $2, max 5 a wallet.
+>
+> A key buys latency: the same call everyone gets, further up the queue. The
+> tier is drawn from a seed nobody could grind, on published odds — 9.91 /
+> 30.03 / 60.06.
+>
+> nekara.xyz/mint
+
+247 characters. Odds and not counts, because fixed counts would need a shuffle
+and the two claims contradict each other.
+
+### Reply 1 · the contract
+
+> Contract: `0xe0b0EBDbfAD58d803B4AB654e9508aa6803550Ec`
+> Robinhood Chain · 4663
+>
+> Mint from the site: the page builds the calldata, your wallet signs it. This
+> process never holds a key of yours or of ours.
+
+### Reply 2 · what it does not buy
+
+> What a key does not buy: revenue, a share of anything, or a promise about
+> returns.
+>
+> It buys seconds on a feed, and a filter above three keys. Access, not an
+> investment — and the failed calls stay up either way.
+
+The strongest post in the set, and the one nobody else writes. Put it up
+yourself before somebody asks.
+
+### Telegram
+
+> **Phase 1 is open.**
+>
+> 666 keys · $2 · max 5 per wallet
+> Tier odds 9.91 / 30.03 / 60.06 — published, not fixed counts
+>
+> A key buys latency on the feed. Three keys opens the alpha channel.
+>
+> The draw runs on a seed nobody could grind: a commitment made before the
+> entropy existed, an Ethereum block hash this chain cannot read, and every mint
+> folded forward into it. Every ingredient is published, so you can recompute
+> the draw yourself.
+>
+> nekara.xyz/mint
+
+### If someone asks why it is odds and not "100 Tier III"
+
+> Because fixed counts need a shuffle, and a shuffle is a different mechanism
+> from a draw. Claiming both is claiming two things that cannot both be true.
+> The odds are in the contract and the seed is published at reveal — check the
+> distribution yourself when the season closes.
+
+---
+
 ## The token
 
 For `x5-token.png` (X) and `x5-token-square.png` (Telegram, Instagram).
