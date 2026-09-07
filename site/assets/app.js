@@ -2832,6 +2832,42 @@ addEventListener("popstate",()=>{
    worse than no icon: a reader who clicks one learns the page is unfinished.
    Fill these in and they work; leave one empty and it does not appear. */
 const SOCIAL={x:"https://x.com/Nekaraxyz",tg:"https://t.me/nekaraxyz"};
+
+/* The token's contract, in one place. Empty means it is not out, and the bar
+   says so rather than showing a chip that copies nothing — the same rule the
+   mint panel follows for a phase with no price. This is the address a reader
+   pastes into a wallet, so it is printed in full on click and never guessed:
+   there is no fallback and no shortening that could hide a changed character. */
+const TOKEN_CA="0xf75a6ddefaAc656579a0f39a1A6faa5f5543709a";
+(function paintCa(){
+  const el=document.getElementById("caVal");
+  if(!el)return;
+  if(!/^0x[0-9a-fA-F]{40}$/.test(TOKEN_CA)){
+    el.className="val soon";
+    el.innerHTML='<i></i>Coming soon';
+    el.disabled=true;
+    return;
+  }
+  // The full address lives on the element, not only in a closure: the shortened
+  // label is for the eye, and anything acting on it — the copy below, a reader
+  // hovering, a test — reads the whole thing from here.
+  el.dataset.ca=TOKEN_CA;
+  el.title=TOKEN_CA;
+  el.textContent=TOKEN_CA.slice(0,6)+"…"+TOKEN_CA.slice(-4);
+  el.addEventListener("click",async()=>{
+    // The whole address or nothing: a copy that silently failed and a copy that
+    // worked must not look alike when the next step is pasting it into a wallet.
+    try{
+      await navigator.clipboard.writeText(TOKEN_CA);
+      const was=el.textContent;
+      el.textContent="Copied";
+      setTimeout(()=>{el.textContent=was},1200);
+    }catch{
+      el.textContent=TOKEN_CA;
+      el.classList.add("full");
+    }
+  });
+})();
 document.querySelectorAll("[data-social]").forEach(a=>{
   const url=SOCIAL[a.dataset.social];
   if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer"}

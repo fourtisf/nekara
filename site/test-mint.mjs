@@ -493,6 +493,30 @@ head("ikon merek menunjuk ke tempat yang benar");
     "begitu juga X — tidak ada satu pun yang tertinggal di \"#\"");
 }
 
+/* The contract address in the header is the one string a reader pastes into a
+   wallet, and on a memecoin the wrong address is somebody else's token with the
+   same name. So: the shortened form must be a prefix and suffix of the real one
+   rather than a rewrite of it, and the full address must be present to copy. */
+head("CA di header adalah alamat yang benar");
+{
+  const a = await boot({});
+  const el = a.doc.getElementById("caVal");
+  ok(el !== null, "barisnya ada di header");
+  const CA = "0xf75a6ddefaAc656579a0f39a1A6faa5f5543709a";
+  ok(!el.disabled && !/Coming soon/.test(el.textContent),
+    `bukan lagi \"Coming soon\" — berbunyi ${el.textContent}`);
+  ok(CA.startsWith(el.textContent.split("\u2026")[0]),
+    "awalannya potongan sungguhan dari alamatnya");
+  ok(CA.endsWith(el.textContent.split("\u2026")[1] ?? "\u0000"),
+    "dan akhirannya juga — bukan alamat lain yang kebetulan mirip");
+
+  // What the copy reads, asserted on the element rather than through a clipboard
+  // stub: jsdom has no clipboard at all, and a test that passes only because a
+  // stub was installed proves the stub.
+  ok(el.dataset.ca === CA, "alamat utuh ada di elemennya, dan itu yang disalin");
+  ok(el.title === CA, "dan tampil utuh saat di-hover");
+}
+
 head("harga dolar hanya muncul kalau kursnya benar-benar terbaca");
 {
   // nextPrices is what the total is actually summed from — one flat phase here,
