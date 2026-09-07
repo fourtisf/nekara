@@ -767,8 +767,11 @@ const USAGE = `
 
   env: DEPLOY_RPC (wajib), DEPLOY_PK (untuk mengirim), KEYS_CONTRACT (opsional),
        ETH_RPC (Ethereum mainnet, hanya dibaca, untuk commit dan reveal)
-       Dibaca dari .keys.env di direktori ini kalau ada — chmod 600 — dan
-       variabel yang sudah di-export tetap menang. KEYS_ENV menunjuk file lain.
+       Dibaca dari .keys.env di direktori kerja, atau di akar repo — chmod 600.
+       BUKAN dari contracts/: file di sana tidak akan pernah terbaca, dan baris
+       ini pernah menulis "di direktori ini", yang membuat seorang operator
+       menaruhnya persis di satu tempat yang dilewati. Variabel yang sudah
+       di-export tetap menang. KEYS_ENV menunjuk file lain.
   Tanpa --confirm setiap perintah hanya mencetak apa yang akan dikirim.
 `;
 
