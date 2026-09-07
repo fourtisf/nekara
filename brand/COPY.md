@@ -199,7 +199,9 @@ anything, or the token. A key buys seconds on a feed and a filter above three
 keys, and that is the whole of it. "Access, not an investment" is on the banner
 because it is the claim the account has to be able to defend on its worst day.
 
-### The post
+### Two posts, on the owner's instruction
+
+**1 — the announcement**, banner attached. 247 characters.
 
 > Proof Keys, Season 1 — phase 1 is open. 666 keys at $2, max 5 a wallet.
 >
@@ -209,27 +211,21 @@ because it is the claim the account has to be able to defend on its worst day.
 >
 > nekara.xyz/mint
 
-247 characters. Odds and not counts, because fixed counts would need a shuffle
-and the two claims contradict each other.
+Odds and not counts, because fixed counts would need a shuffle and the two
+claims contradict each other.
 
-### Reply 1 · the contract
+**2 — the reply.** 240 characters, and it carries two jobs because there is no
+third post: the address a buyer pastes, and the sentence nobody else on that
+timeline writes.
 
-> Contract: `0xe0b0EBDbfAD58d803B4AB654e9508aa6803550Ec`
-> Robinhood Chain · 4663
+> Contract: `0xe0b0EBDbfAD58d803B4AB654e9508aa6803550Ec` — Robinhood Chain, 4663.
 >
-> Mint from the site: the page builds the calldata, your wallet signs it. This
-> process never holds a key of yours or of ours.
-
-### Reply 2 · what it does not buy
-
-> What a key does not buy: revenue, a share of anything, or a promise about
-> returns.
->
+> A key does not buy revenue, a share of anything, or a promise about returns.
 > It buys seconds on a feed, and a filter above three keys. Access, not an
-> investment — and the failed calls stay up either way.
+> investment.
 
-The strongest post in the set, and the one nobody else writes. Put it up
-yourself before somebody asks.
+Post it yourself rather than waiting to be asked. The same words are an answer
+when you write them first and a defence when somebody else does.
 
 ### Telegram
 
