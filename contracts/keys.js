@@ -23,6 +23,7 @@
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
+const { createHash } = require('crypto');
 const { ethers } = require('ethers');
 const { compile, artifact } = require('./build.js');
 
@@ -771,6 +772,9 @@ const USAGE = `
     reveal [rahasia]               buka seed (fase harus Closed). Dipipa seperti
                                    commit; tanpa --confirm ia hanya memeriksa
                                    bahwa rahasianya cocok dengan komitmen
+    art <tokenId>                  tarik tokenURI dari chain, simpan SVG-nya ke
+                                   out/, dan cetak traitnya — satu-satunya cara
+                                   tahu seninya benar-benar berubah
     withdraw <alamat>              kirim seluruh saldo kontrak
 
   env: DEPLOY_RPC (wajib), DEPLOY_PK (untuk mengirim), KEYS_CONTRACT (opsional),
@@ -954,6 +958,35 @@ const USAGE = `
     console.log('\nKetiga bahan itu tersimpan on-chain setelah ini, jadi siapa pun bisa');
     console.log('menghitung ulang baris di atas dan mencocokkan hash-nya ke Ethereum.\n');
     return void await send('reveal', c, 'reveal', [h, ethHash], { confirm });
+  }
+
+  /* What the contract actually draws, pulled out of the contract.
+     A successful setRenderer moves a pointer and nothing more: the receipt says
+     the transaction landed, never that the picture changed. This is the only
+     way to know — read tokenURI off the chain, decode it, and look. */
+  if (cmd === 'art') {
+    const id = argv._[1];
+    if (!/^\d+$/.test(String(id))) die('usage: keys.js art <tokenId>');
+    const uri = await retry(() => c.tokenURI(id), `tokenURI(${id})`);
+    const m = /^data:application\/json;base64,(.+)$/.exec(uri);
+    if (!m) die(`tokenURI(${id}) bukan data:application/json;base64 — ${uri.slice(0, 80)}…`);
+    const meta = JSON.parse(Buffer.from(m[1], 'base64').toString('utf8'));
+    const img = /^data:image\/svg\+xml;base64,(.+)$/.exec(meta.image ?? '');
+    if (!img) die('metadata tidak memuat SVG base64');
+    const svg = Buffer.from(img[1], 'base64').toString('utf8');
+    fs.mkdirSync(OUT, { recursive: true });
+    const file = path.join(OUT, `onchain-${String(id).padStart(4, '0')}.svg`);
+    fs.writeFileSync(file, svg);
+
+    console.log(`  nama         ${meta.name}`);
+    for (const a of meta.attributes ?? [])
+      console.log(`  ${String(a.trait_type).padEnd(12)} ${a.value}`);
+    console.log(`  svg          ${svg.length} byte`);
+    console.log(`  sha256       ${createHash('sha256').update(svg).digest('hex')}`);
+    console.log(`\ntersimpan di ${path.relative(process.cwd(), file)} — buka di browser dan`);
+    console.log('bandingkan dengan halaman mint. Tier "Not drawn yet" sebelum reveal itu benar:');
+    console.log('ukiran digambar dari nomor token, hanya tier yang menunggu seed.');
+    return;
   }
 
   if (cmd === 'withdraw') {
