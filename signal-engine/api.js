@@ -20,6 +20,7 @@ import { NonceStore, issueSession, readSession, verifySiwe, StaticTierSource } f
 import { NoHoldings, levelFor, LADDER, LEVEL_NAME, PUBLIC as L_PUBLIC, PREMIUM as L_PREMIUM } from "./holdings.js";
 import { SIGNALS } from "./rules.js";
 import { KeysReader } from "./keys.js";
+import { EthUsd } from "./usd.js";
 
 const readBody = req => new Promise((resolve, reject) => {
   let b = ""; let over = false;
@@ -44,6 +45,9 @@ export function serve(store, {
   alphaChat = null,
   keys = new KeysReader({ log: console.log }),
   log = console.log,
+  // Declared after log so it can use it: a default parameter cannot read one
+  // that comes later in the list.
+  usd = new EthUsd({ log }),
 } = {}) {
   if (!secret) {
     // A default secret is a signing key everyone already has.
@@ -199,7 +203,11 @@ export function serve(store, {
       const a = url.searchParams.get("address");
       if (a !== null && !/^0x[0-9a-fA-F]{40}$/.test(a))
         return json(res, 400, { error: "address must be 0x and 40 hex characters" });
-      return json(res, 200, await keys.state(a));
+      /* The dollar figure the panel prints beside the ETH one. Read here rather
+         than in the browser so there is one source and one failure: null means
+         the page shows no dollars at all, never a rate it made up. */
+      const st = await keys.state(a);
+      return json(res, 200, { ...st, usdPerEth: await usd.rate() });
     }
 
     /* ── register, all tier-filtered ── */

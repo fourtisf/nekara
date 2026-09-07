@@ -62,6 +62,7 @@ const baseState = over => ({
  */
 async function boot({ identity = IDENTITY, state = baseState(), chainId = CHAIN,
                       wallet = true, sendFails = null, switchFails = false,
+                      usdPerEth = null,
                       url = "http://localhost/", navigate = true, announce = [] } = {}) {
   const dom = new JSDOM(readFileSync(join(ROOT, "site", "index.html"), "utf8"),
     { url, runScripts: "outside-only", pretendToBeVisual: true });
@@ -79,7 +80,8 @@ async function boot({ identity = IDENTITY, state = baseState(), chainId = CHAIN,
   win.fetch = async u => {
     const p = String(u);
     fetched.push(p);
-    if (p.includes("/api/keys/state")) return { ok: true, json: async () => ({ ...identity, state }) };
+    if (p.includes("/api/keys/state"))
+      return { ok: true, json: async () => ({ ...identity, state, usdPerEth }) };
     if (p.includes("/api/keys")) return { ok: true, json: async () => identity };
     throw new Error("offline");     // every other route is out of scope here
   };
@@ -468,6 +470,43 @@ head("alamat halaman");
  * as 0.0000 that reads as free, which is the one thing a mint panel must never
  * say by accident.
  */
+/* ═══════ dollars, or none ═══════
+   The wallet signs the ETH figure; the dollar one beside it is a convenience,
+   and the moment it is invented it stops being one. So the rule under test is
+   not "it converts" — it is that a rate the route could not read leaves the
+   panel with no dollar figure at all, rather than a stale or guessed price a
+   buyer would act on. */
+head("harga dolar hanya muncul kalau kursnya benar-benar terbaca");
+{
+  // nextPrices is what the total is actually summed from — one flat phase here,
+  // so the dollars track quantity rather than a ladder stepping up mid-basket.
+  const a = await boot({ usdPerEth: 2500,
+    state: baseState({ price: P1, unitPrice: P1, nextPrices: Array(5).fill(P1) }) });
+  const unit = a.doc.getElementById("unitUsd"), total = a.doc.getElementById("totalUsd");
+  ok(/^\$1\.75$/.test(unit.textContent), `0.0007 ETH @ 2500 dicetak ${unit.textContent}`);
+  ok(!unit.hidden, "dan barisnya terlihat");
+  ok(/^\$1\.75$/.test(total.textContent), "totalnya untuk satu key sama");
+
+  a.doc.getElementById("qPlus").dispatchEvent(new a.win.Event("click", { bubbles: true }));
+  await sleep(0);
+  ok(/^\$3\.50$/.test(a.doc.getElementById("totalUsd").textContent),
+    `dua key jadi ${a.doc.getElementById("totalUsd").textContent} — totalnya ikut kuantitas`);
+
+  const b = await boot({ usdPerEth: null, state: baseState({ price: P1, unitPrice: P1 }) });
+  ok(b.doc.getElementById("unitUsd").textContent === "", "kurs tak terbaca: tidak ada angka dolar");
+  ok(b.doc.getElementById("unitUsd").hidden, "dan barisnya disembunyikan, bukan diisi tanda hubung");
+  ok(b.doc.getElementById("totalUsd").textContent === "", "begitu juga totalnya");
+  ok(/ETH/.test(b.doc.getElementById("total").textContent),
+    "angka ETH-nya tetap ada — yang hilang cuma kenyamanannya");
+
+  /* A closed phase prints a dash rather than 0.0000, and a dollar figure of
+     $0.00 beside it would put the word free back on the panel by another road. */
+  const c = await boot({ usdPerEth: 2500,
+    state: baseState({ phase: 0, phaseName: "closed", price: "0", unitPrice: "0", canMint: undefined }) });
+  ok(c.doc.getElementById("unitUsd").textContent === "", "fase tertutup: tidak ada $0.00");
+  ok(c.doc.getElementById("totalUsd").textContent === "", "dan tidak ada di totalnya");
+}
+
 head("satu dompet, satu kali connect");
 {
   const a = await boot({ wallet: false, state: baseState({ phase: 0, phaseName: "closed",

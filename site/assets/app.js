@@ -892,7 +892,7 @@ if(DEMO)setInterval(tick,2600);
    would have them signing a transaction that cannot succeed. */
 
 let qty=1,preview=Math.floor(Math.random()*666)+1;
-const MINT={id:null,state:null,busy:false};
+const MINT={id:null,state:null,usdPerEth:null,busy:false};
 
 const wei=v=>{try{return BigInt(v)}catch{return 0n}};
 /* Wei is 18 digits; a double loses the tail. Format from the string so the
@@ -900,6 +900,17 @@ const wei=v=>{try{return BigInt(v)}catch{return 0n}};
 function eth(v,dp=4){
   const n=wei(v),whole=n/10n**18n,frac=(n%10n**18n).toString().padStart(18,"0").slice(0,dp);
   return dp?`${whole}.${frac}`:String(whole);
+}
+/* Dollars beside the ETH, and nothing at all when the rate could not be read.
+   MINT.state carries usdPerEth from the route; null means we do not know, and
+   an invented rate is a price a buyer would act on. */
+function usd(v){
+  const r=MINT.usdPerEth;
+  if(!(typeof r==="number"&&isFinite(r)&&r>0))return null;
+  const n=Number(eth(v,18));
+  if(!isFinite(n))return null;
+  const d=n*r;
+  return "$"+(d<10?d.toFixed(2):d.toFixed(0));
 }
 const hexQ=n=>"0x"+BigInt(n).toString(16);
 /* The public price steps up partway through the season, so a basket can cost
@@ -1143,6 +1154,12 @@ async function copyContract(){
 }
 document.getElementById("ctrCopy")?.addEventListener("click",copyContract);
 
+function setUsd(id,text){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=text??"";
+  el.hidden=!text;
+}
 function syncMint(){
   paintContractLinks();
   const st=MINT.state,cfg=MINT.id;
@@ -1156,8 +1173,12 @@ function syncMint(){
      0.0000 that reads as free, which is the one thing a mint panel must never
      say by accident — so a price nobody can pay is a dash. */
   const noPrice=st&&unit===0n;
+  const due=dueFor(st,qty,unit);
   document.getElementById("unitPrice").textContent=noPrice?"—":eth(unit);
-  document.getElementById("total").textContent=noPrice?"—":eth(dueFor(st,qty,unit))+" ETH";
+  document.getElementById("total").textContent=noPrice?"—":eth(due)+" ETH";
+  // Two dashes would read as two prices nobody can pay; a closed phase has one.
+  setUsd("unitUsd",noPrice?null:usd(unit));
+  setUsd("totalUsd",noPrice?null:usd(due));
   document.getElementById("qMinus").disabled=qty<=1;
   document.getElementById("qPlus").disabled=qty>=max;
 
@@ -1210,6 +1231,9 @@ async function loadMintState(){
     const r=await fetch(API+"/keys/state"+(who?"?address="+who:""),noStore());
     const j=await r.json();
     MINT.state=j.state??null;
+    // Absent means the rate could not be read, and that must clear the old one:
+    // a dollar figure left over from the last poll is a stale price on screen.
+    MINT.usdPerEth=typeof j.usdPerEth==="number"?j.usdPerEth:null;
     if(MINT.state){
       setRevealedFromChain(!!MINT.state.revealed);
       setSeasonSeed(MINT.state.seed);
@@ -1217,6 +1241,7 @@ async function loadMintState(){
   }catch{
     // Unreachable is a state, not a zero.
     MINT.state=null;
+    MINT.usdPerEth=null;
   }
   syncMint();
   renderMine();

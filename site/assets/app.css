@@ -417,6 +417,11 @@ footer{border-top:1px solid var(--border);padding:34px 0;display:flex;justify-co
 .prow .k{font-size:13px;color:var(--tx-2)}
 .prow .v{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums}
 .prow .v.big{font-family:var(--display);font-size:24px;font-weight:600;letter-spacing:-.03em}
+/* The dollar figure sits under the asset figure, never beside it: the wallet
+   signs the ETH and the dollars are a convenience, and two numbers on one line
+   read as a choice of currency. Absent when the rate could not be read. */
+.prow .usd{display:block;font-family:var(--mono);font-size:11.5px;color:var(--tx-3);
+ letter-spacing:.02em;margin-top:3px;text-align:right}
 .qty{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:9px;overflow:hidden}
 .qty button{width:34px;height:34px;color:var(--tx-2);font-size:16px;transition:.15s}
 .qty button:hover{background:var(--surface-3);color:var(--tx)}
