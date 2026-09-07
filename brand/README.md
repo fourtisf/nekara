@@ -146,10 +146,26 @@ account rather than four templates.
 | `x3-launch.png` / `x3-launch-square.png` | 1600×900 / 1080×1080 | launch |
 | `x4-mint-live.png` / `x4-mint-live-square.png` | 1600×900 / 1080×1080 | phase 1 mint |
 | `x5-token.png` / `x5-token-square.png` | 1600×900 / 1080×1080 | the token |
+| `a1-alpha.png` / `a2-alpha-square.png` | 1600×900 / 1080×1080 | the alpha channel |
 
 `x5-token` carries no contract address on purpose. A banner cannot be corrected
 once it is on a timeline, and the ticker is the part that does not change; the
 address goes in the post, where a reply can fix it.
+
+`a1-alpha` is the one banner where the obvious headline would be a lie. "Get
+signals first" is what every competitor prints, and the alpha channel is not
+that: it rides `delays[0]` exactly like the public leg, because a Telegram
+channel cannot ask who is reading it and posting early would put everyone
+holding the invite ahead of every key holder who paid for seconds. So the spec
+band says **`a filter, never a head start`** out loud, and what is sold is what
+the channel actually does — the filter.
+
+Its picture states the requirement instead of captioning it: three medallions,
+because three keys is the Premium rung. Different headwear on each so the trio
+is three keys rather than one key printed three times, all from the blue and
+violet palettes so the artwork does not argue with `--grad`, and every one of
+them through `keyBody`, which blanks the tier — a banner must never print a
+draw that has not run.
 
 Its four facts are structural — chain id, append-only, the gate count, the
 season size — and every one of them is checkable. Nothing that moves goes on a

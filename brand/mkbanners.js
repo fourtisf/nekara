@@ -745,7 +745,7 @@ const keyWall = (w, h, tile) => {
     filter:brightness(1.72) saturate(1.08)">${rowsHtml}</div>`;
 };
 
-const MEDALLION = d => `
+const MEDALLION = (d, key = TOKEN_KEY) => `
 <div style="position:relative;width:${d}px;height:${d}px;flex-shrink:0">
   <div class="rosette" style="inset:${-d * 1.5}px"></div>
   <div style="position:absolute;inset:${-d * .30}px;border-radius:50%;opacity:.16;
@@ -761,7 +761,7 @@ const MEDALLION = d => `
     border:1px solid rgba(255,255,255,.15);
     box-shadow:inset 0 2px 0 rgba(255,255,255,.07),0 50px 110px -34px rgba(0,0,0,1)">
     <svg viewBox="50 12 500 500" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
-      style="display:block;filter:brightness(1.42) contrast(1.04)">${keyBody(TOKEN_KEY)}</svg>
+      style="display:block;filter:brightness(1.42) contrast(1.04)">${keyBody(key)}</svg>
     <div style="position:absolute;inset:0;
       background:radial-gradient(76% 62% at 50% 34%,rgba(110,123,255,.16),transparent 68%)"></div>
     <div style="position:absolute;inset:0;
@@ -868,6 +868,155 @@ fs.writeFileSync('brand/banners/x5-token.html', token(1600, 900));
 fs.writeFileSync('brand/banners/x5-token-square.html', token(1080, 1080));
 
 
+/* ── alpha ─────────────────────────────────────────────────────────────── */
+
+/* The one banner where the temptation is to lie, and the lie is the obvious
+   headline: "get signals first". The alpha channel rides `delays[0]` exactly
+   like the public one, because a Telegram channel cannot ask who is reading it
+   and posting to one early would put everybody holding the invite link ahead of
+   every key holder who paid for seconds. So what is sold here is the filter,
+   and the frame says so out loud in the spec band — "a filter, never a head
+   start". A competitor's banner promises early access it has no way to deliver;
+   this one promises the thing it actually does.
+
+   The picture states the requirement rather than captioning it: three keys,
+   because three keys is the rung. Different headwear on each so the trio reads
+   as three keys rather than one key printed three times, and all three from the
+   blue-violet palettes so the artwork does not argue with --grad. keyBody
+   blanks the tier, so none of them claims a draw that has not run. */
+
+const ALPHA_KEYS = [5, 21, 46];        // Azure Hood · Iris Crown · Azure Halo
+
+/* Every medallion draws its rings outside its own box — the turned halo sits at
+   -.30 of the diameter — so a row sized to the three boxes is a row whose
+   outermost rings are cut by the trim. The padding is that overhang, stated
+   once, and TRIO_W is what a layout must reserve for it. */
+const TRIO_PAD = d => Math.round(d * .34);
+const TRIO_W = d => Math.round(d + 2 * (d * .78) - 2 * (d * .21)) + 2 * TRIO_PAD(d);
+
+const TRIO = d => `
+<div style="position:relative;height:${Math.round(d * 1.36)}px;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;
+  padding:0 ${TRIO_PAD(d)}px">
+  <!-- The wall is bright by design and the keys in front of it are the subject.
+       Without a pool of shade under them the trio reads as three more tiles. -->
+  <div style="position:absolute;left:50%;top:50%;width:${Math.round(d * 3.9)}px;
+    height:${Math.round(d * 3.6)}px;transform:translate(-50%,-50%);pointer-events:none;
+    background:radial-gradient(circle,rgba(8,9,11,.86) 22%,rgba(8,9,11,.62) 42%,transparent 66%)"></div>
+  ${ALPHA_KEYS.map((k, i) => {
+    const mid = i === 1, sz = mid ? d : Math.round(d * .78);
+    return `<div style="position:relative;z-index:${mid ? 3 : 1};
+      margin-left:${i ? -Math.round(d * .21) : 0}px;
+      transform:translateY(${mid ? 0 : Math.round(d * .1)}px);
+      opacity:${mid ? 1 : .93}">${MEDALLION(sz, k)}</div>`;
+  }).join('')}
+</div>`;
+
+/* Three steps, because the question a reader actually has is "how do I get in",
+   and the answer is short enough to print. Numbered in mono so it reads as a
+   procedure rather than as three more claims. */
+const STEPS = fs2 => `
+<div style="display:flex;align-items:center;gap:22px;margin-top:30px;flex-wrap:wrap">
+  ${[['01', 'Connect the wallet'], ['02', 'Link Telegram'], ['03', 'Invited']]
+    .map(([n, t], i) => `${i ? `<span style="color:var(--tx-3);font-size:${fs2}px">·</span>` : ''}
+      <span style="display:flex;align-items:baseline;gap:8px">
+        <span class="mono" style="font-size:${fs2 - 1.5}px;color:var(--accent)">${n}</span>
+        <span style="font-size:${fs2 + 2}px;color:var(--tx-2);letter-spacing:.01em">${t}</span>
+      </span>`).join('')}
+</div>`;
+
+const ALPHA_SPECS = [
+  ['Three keys', 'counted on the chain, per request'],
+  ['Highest scores only', 'the filter is the whole point'],
+  ['Same clock as public', 'a filter, never a head start'],
+  ['Single use · 15 min', 'and the seat is swept back'],
+];
+
+const alpha = (w, h) => {
+  const sq = h > 1000;
+  return page(w, h, `
+${keyWall(w, h, sq ? 168 : 186)}
+${sq
+  ? `<div style="position:absolute;inset:0;background:
+      radial-gradient(86% 62% at 50% 26%,rgba(8,9,11,.10) 8%,rgba(8,9,11,.66) 52%,rgba(8,9,11,.95))"></div>
+     <div style="position:absolute;inset:0;background:
+      linear-gradient(180deg,rgba(8,9,11,.90),transparent 19%,transparent 33%,
+      rgba(8,9,11,.90) 54%,rgba(8,9,11,.98) 70%,rgba(8,9,11,.99))"></div>`
+  : `<div style="position:absolute;inset:0;background:
+      linear-gradient(90deg,rgba(8,9,11,.97) 26%,rgba(8,9,11,.88) 44%,rgba(8,9,11,.42) 66%,rgba(8,9,11,.60))"></div>
+     <div style="position:absolute;inset:0;background:
+      linear-gradient(180deg,rgba(8,9,11,.90),transparent 19%,transparent 48%,
+      rgba(8,9,11,.88) 76%,rgba(8,9,11,.97))"></div>`}
+<div class="keylight"></div><div class="guil"></div>
+
+<div style="position:absolute;inset:0;padding:${sq ? '76px 74px 70px' : '62px 76px 58px'};
+  display:flex;flex-direction:column">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+    <div style="display:flex;align-items:center;gap:13px">
+      <span style="width:9px;height:9px;border-radius:50%;background:var(--accent);
+        box-shadow:0 0 0 5px rgba(110,123,255,.13)"></span>
+      <span class="eyebrow">Proof Keys · Private channel</span>
+    </div>
+    <div class="wm">${MARK}<span style="font-size:${sq ? 32 : 31}px">Nekara</span></div>
+  </div>
+
+  ${sq ? `
+  <div style="margin:auto 0;display:flex;flex-direction:column;align-items:center;text-align:center">
+    ${TRIO(186)}
+    <div class="mono" style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+      color:var(--tx-2);margin-top:10px;
+      text-shadow:0 2px 10px rgba(8,9,11,.95),0 0 20px rgba(8,9,11,.9)">Three keys opens it</div>
+    <div style="font-family:var(--display);font-weight:600;letter-spacing:-.045em;
+      font-size:112px;line-height:1;margin-top:20px;
+      text-shadow:0 24px 70px rgba(0,0,0,.9)" class="grad-tx">Alpha</div>
+    <p style="font-size:19px;line-height:1.6;color:var(--tx-2);max-width:720px;margin-top:20px">
+      A second Telegram channel carrying only the desk's highest-scoring calls.
+      The invite is issued to the wallet, and taken back when the keys go.</p>
+    <div style="display:flex;justify-content:center;width:100%">${STEPS(13.5)}</div>
+  </div>`
+  : `
+  <div style="margin:auto 0;display:flex;align-items:center;gap:46px;width:100%">
+    <div style="flex:1;min-width:0">
+      <div style="font-family:var(--display);font-weight:600;letter-spacing:-.045em;
+        font-size:132px;line-height:1;text-shadow:0 24px 70px rgba(0,0,0,.9)" class="grad-tx">Alpha</div>
+      <div class="rule-l" style="width:220px;margin:26px 0 22px"></div>
+      <p style="font-size:20px;line-height:1.62;color:var(--tx-2);max-width:560px">
+        A second Telegram channel carrying only the desk's highest-scoring calls.
+        The invite is issued to the wallet, and taken back when the keys go.</p>
+      ${STEPS(13)}
+    </div>
+    <div style="width:${TRIO_W(168)}px;flex-shrink:0;display:flex;flex-direction:column;
+      align-items:center">
+      ${TRIO(168)}
+      <div class="mono" style="font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;
+        color:var(--tx-2);margin-top:8px;text-align:center;
+        text-shadow:0 2px 10px rgba(8,9,11,.95),0 0 20px rgba(8,9,11,.9)">Three keys opens it</div>
+    </div>
+  </div>`}
+
+  ${specBand(sq ? [ALPHA_SPECS.slice(0, 2), ALPHA_SPECS.slice(2)] : [ALPHA_SPECS], sq ? 18 : 17, sq ? 12.5 : 12)}
+
+  <div style="display:flex;align-items:center;justify-content:${sq ? 'center' : 'space-between'};
+    gap:18px;width:100%;margin-top:${sq ? 24 : 26}px">
+    <div style="display:flex;align-items:center;gap:18px">
+      <div style="padding:14px 28px;border-radius:var(--r);background:var(--grad);
+        font-family:var(--display);font-weight:600;font-size:19px;color:#fff;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 10px 26px -10px rgba(91,124,250,.7)">nekara.xyz/alpha</div>
+      <div class="mono" style="font-size:15px">/alpha · @nekaraxbot</div>
+    </div>
+    ${sq ? '' : `<div class="mono" style="font-size:12.5px;letter-spacing:.2em;text-transform:uppercase">
+      Season 1 · 666 keys</div>`}
+  </div>
+</div>
+${PLATE(sq ? 40 : 38)}
+<div class="grain"></div>`);
+};
+
+fs.writeFileSync('brand/banners/a1-alpha.html', alpha(1600, 900));
+fs.writeFileSync('brand/banners/a2-alpha-square.html', alpha(1080, 1080));
+
+
 if (!CA) console.error('  peringatan: out/keys.4663.json tidak terbaca — banner mint tanpa alamat kontrak');
 
-console.log('24 banner + 1 avatar ditulis');
+console.log('26 banner + 1 avatar ditulis');

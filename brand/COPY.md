@@ -132,6 +132,41 @@ current market cap.
 
 ---
 
+## The alpha channel
+
+For `a1-alpha.png` (X) and `a2-alpha-square.png` (Telegram, Instagram).
+
+**What this copy may not say.** Not "first", not "early", not "ahead of the
+public channel". The alpha channel rides `delays[0]` exactly like the public
+leg — a Telegram channel cannot ask who is reading it, so posting to one early
+would hand everybody with the invite link a head start over every key holder
+who paid for seconds. What separates it is *what goes in it*, never *when*.
+Nor may it name the channel or paste an invite: the links are single-use,
+fifteen-minute and issued per wallet, and a link in a post is a seat given to
+whoever scrolls fastest.
+
+### The post
+
+> Three keys opens a second channel.
+>
+> Not earlier — the alpha channel posts on the same clock as the public one.
+> Only the highest-scoring calls go in it.
+>
+> The invite is issued to the wallet that holds the keys, and taken back when
+> they go.
+>
+> nekara.xyz/alpha
+
+189 characters. The second line is the one doing the work: saying plainly that
+this is not a head start is the claim nobody else on that timeline can make,
+and it is the only reason to believe the rest of the account.
+
+### The reply, if someone asks how
+
+> Connect the wallet on nekara.xyz/alpha, send /link to @nekaraxbot, paste the
+> code. If the wallet holds three keys the bot hands you the link the moment it
+> is linked. `/alpha` asks again any time.
+
 ## The token
 
 For `x5-token.png` (X) and `x5-token-square.png` (Telegram, Instagram).
