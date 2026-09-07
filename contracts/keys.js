@@ -133,7 +133,13 @@ function wallet() {
   // default, so a confirmation takes longer to notice than to happen.
   provider.pollingInterval = Number(env('DEPLOY_POLL_MS') ?? 2000);
   if (!pk) return { provider, signer: null };
-  if (!/^0x[0-9a-fA-F]{64}$/.test(pk)) die('DEPLOY_PK bukan private key 32 byte');
+  // Never the value, only its shape: an operator debugging this is looking at a
+  // terminal that ends up in a screenshot. Length and prefix are enough to say
+  // which of the two mistakes it is, and neither of them leaks the key.
+  if (!/^0x[0-9a-fA-F]{64}$/.test(pk))
+    die(`DEPLOY_PK bukan private key 32 byte — harus 0x diikuti 64 karakter heksadesimal.\n`
+      + `  yang terbaca: ${pk.length} karakter, ${pk.startsWith('0x') ? 'berawalan 0x' : 'TANPA awalan 0x'}`
+      + `${pk.length === 0 ? ' — kosong, jadi barisnya ada tapi nilainya tidak pernah terisi' : ''}`);
   return { provider, signer: new ethers.Wallet(pk, provider) };
 }
 
